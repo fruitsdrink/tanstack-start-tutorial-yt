@@ -1,8 +1,14 @@
+/*
+ * @Author: 水果饮料
+ * @Date: 2026-01-17 10:41:20
+ * @LastEditors: 水果饮料
+ * @LastEditTime: 2026-01-17 12:30:40
+ * @FilePath: /tanstack-start-tutorial-yt/src/routes/__root.tsx
+ * @Description:
+ */
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-
-import Header from '../components/Header'
 
 import appCss from '../styles.css?url'
 
@@ -38,7 +44,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Header />
         {children}
         <TanStackDevtools
           config={{
