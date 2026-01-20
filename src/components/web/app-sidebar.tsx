@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-20 22:46:21
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-20 22:50:17
+ * @LastEditTime: 2026-01-20 23:25:53
  * @FilePath: /tanstack-start-tutorial-yt/src/components/web/app-sidebar.tsx
  * @Description:
  */
@@ -10,6 +10,7 @@
 import * as React from 'react'
 import {
   AudioWaveform,
+  BookmarkIcon,
   BookOpen,
   Bot,
   Command,
@@ -24,14 +25,18 @@ import {
 import { NavMain } from './nav-main'
 import { NavProjects } from './nav-projects'
 import { NavUser } from './nav-user'
-import { TeamSwitcher } from './team-switcher'
+// import { TeamSwitcher } from './team-switcher'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import { Link } from '@tanstack/react-router'
 
 // This is sample data.
 const data = {
@@ -167,7 +172,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        {/* <TeamSwitcher teams={data.teams} /> */}
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size={'lg'} asChild>
+              <Link to="/dashboard" className="flex items-center gap-3">
+                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <BookmarkIcon className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="font-medium">Recall</span>
+                  <span className="text-xs text-muted-foreground">
+                    Your Ai Knowledge Base
+                  </span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
