@@ -1,14 +1,16 @@
-import { Button } from '../ui/button'
-import { ThemeToggle } from './theme-toggle'
-
 /*
  * @Author: 水果饮料
  * @Date: 2026-01-17 12:31:23
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-20 17:01:41
+ * @LastEditTime: 2026-01-20 20:15:04
  * @FilePath: /tanstack-start-tutorial-yt/src/components/web/navbar.tsx
  * @Description: 导航组件
  */
+
+import { Link } from '@tanstack/react-router'
+import { buttonVariants } from '../ui/button'
+import { ThemeToggle } from './theme-toggle'
+
 export function Navbar() {
   return (
     <nav className=" sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -24,8 +26,15 @@ export function Navbar() {
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <Button variant={'secondary'}>Login</Button>
-          <Button>Get Started</Button>
+          <Link
+            to="/login"
+            className={buttonVariants({ variant: 'secondary' })}
+          >
+            Login
+          </Link>
+          <Link to="/signup" className={buttonVariants()}>
+            Get Started
+          </Link>
         </div>
       </div>
     </nav>
