@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-20 17:27:09
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-20 20:54:47
+ * @LastEditTime: 2026-01-20 21:59:48
  * @FilePath: /tanstack-start-tutorial-yt/src/components/web/login-form.tsx
  * @Description: 登录表单组件
  */
@@ -22,21 +22,37 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { authClient } from '@/lib/auth-client'
 import { loginSchema } from '@/schemas/auth'
 import { useForm } from '@tanstack/react-form-start'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
 
 export function LoginForm() {
+  const navigate = useNavigate()
+
   const form = useForm({
     defaultValues: {
-      email: '',
-      password: '',
+      email: 'admin@example.com',
+      password: '12345678',
     },
     validators: {
       onSubmit: loginSchema,
     },
-    onSubmit: (data) => {
-      console.log(data)
+    onSubmit: async ({ value }) => {
+      await authClient.signIn.email({
+        email: value.email,
+        password: value.password,
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success('Login successful')
+            navigate({ to: '/' })
+          },
+          onError: ({ error }) => {
+            toast.error(error.message || 'Login failed')
+          },
+        },
+      })
     },
   })
 
@@ -99,6 +115,7 @@ export function LoginForm() {
                       aria-invalid={isInvalid}
                       placeholder="********"
                       autoComplete="off"
+                      type="password"
                     />
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />

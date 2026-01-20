@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-20 17:31:19
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-20 20:49:54
+ * @LastEditTime: 2026-01-20 22:00:09
  * @FilePath: /tanstack-start-tutorial-yt/src/components/web/signup-form.tsx
  * @Description:
  */
@@ -22,22 +22,40 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form-start'
 import { signupSchema } from '@/schemas/auth'
+import { authClient } from '@/lib/auth-client'
+import { toast } from 'sonner'
 
 export function SignupForm() {
+  const navigate = useNavigate()
+
   const form = useForm({
     defaultValues: {
-      fullName: '',
-      email: '',
-      password: '',
+      fullName: 'admin',
+      email: 'admin@example.com',
+      password: '12345678',
     },
     validators: {
       onSubmit: signupSchema,
     },
-    onSubmit: (data) => {
-      console.log(data)
+    onSubmit: async ({ value }) => {
+      await authClient.signUp.email({
+        name: value.fullName,
+        email: value.email,
+        password: value.password,
+        // callbackURL: '/dashboard',
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success('Account created successfully')
+            navigate({ to: '/' })
+          },
+          onError: ({ error }) => {
+            toast.error(error.message || 'Account creation failed')
+          },
+        },
+      })
     },
   })
 
