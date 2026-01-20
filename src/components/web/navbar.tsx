@@ -1,12 +1,13 @@
 import { Button } from '../ui/button'
+import { ThemeToggle } from './theme-toggle'
 
 /*
  * @Author: 水果饮料
  * @Date: 2026-01-17 12:31:23
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-17 15:35:09
+ * @LastEditTime: 2026-01-20 17:01:41
  * @FilePath: /tanstack-start-tutorial-yt/src/components/web/navbar.tsx
- * @Description:
+ * @Description: 导航组件
  */
 export function Navbar() {
   return (
@@ -22,6 +23,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <Button variant={'secondary'}>Login</Button>
           <Button>Get Started</Button>
         </div>

@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-17 10:41:20
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-17 12:30:40
+ * @LastEditTime: 2026-01-20 16:59:54
  * @FilePath: /tanstack-start-tutorial-yt/src/routes/__root.tsx
  * @Description:
  */
@@ -11,6 +11,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import appCss from '../styles.css?url'
+import { ThemeProvider } from '@/lib/theme-provider'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -39,12 +40,12 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
         <TanStackDevtools
           config={{
             position: 'bottom-right',
