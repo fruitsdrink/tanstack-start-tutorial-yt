@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-17 12:31:23
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-20 22:06:30
+ * @LastEditTime: 2026-01-20 23:02:05
  * @FilePath: /tanstack-start-tutorial-yt/src/components/web/navbar.tsx
  * @Description: 导航组件
  */
@@ -48,7 +48,7 @@ export function Navbar() {
               <Button variant={'secondary'} onClick={handleLogout}>
                 Logout
               </Button>
-              <Link to="/" className={buttonVariants()}>
+              <Link to="/dashboard" className={buttonVariants()}>
                 Dashboard
               </Link>
             </>

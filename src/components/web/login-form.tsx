@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-20 17:27:09
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-20 21:59:48
+ * @LastEditTime: 2026-01-20 22:53:54
  * @FilePath: /tanstack-start-tutorial-yt/src/components/web/login-form.tsx
  * @Description: 登录表单组件
  */
@@ -46,7 +46,7 @@ export function LoginForm() {
         fetchOptions: {
           onSuccess: () => {
             toast.success('Login successful')
-            navigate({ to: '/' })
+            navigate({ to: '/dashboard' })
           },
           onError: ({ error }) => {
             toast.error(error.message || 'Login failed')
