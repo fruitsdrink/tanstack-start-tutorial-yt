@@ -11,20 +11,18 @@ import { Link } from '@tanstack/react-router'
 import { Button, buttonVariants } from '../ui/button'
 import { ThemeToggle } from './theme-toggle'
 import { authClient } from '@/lib/auth-client'
-import { toast } from 'sonner'
+import { useAuth } from '@/hooks/use-auth'
 
 export function Navbar() {
   const { data: session, isPending } = authClient.useSession()
+  const { isPending: isLogout, logout } = useAuth()
 
   const handleLogout = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          toast.success('Logged out successfully')
-        },
-        onError: ({ error }) => {
-          toast.error(error.message || 'Logout failed')
-        },
+    await logout({
+      onSuccess: (navigate) => {
+        navigate({
+          to: '/',
+        })
       },
     })
   }
@@ -45,8 +43,12 @@ export function Navbar() {
           <ThemeToggle />
           {isPending ? null : session ? (
             <>
-              <Button variant={'secondary'} onClick={handleLogout}>
-                Logout
+              <Button
+                variant={'secondary'}
+                disabled={isLogout}
+                onClick={handleLogout}
+              >
+                {isLogout ? 'Logout...' : 'Logout'}
               </Button>
               <Link to="/dashboard" className={buttonVariants()}>
                 Dashboard

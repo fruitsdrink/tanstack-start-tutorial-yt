@@ -26,10 +26,12 @@ import { authClient } from '@/lib/auth-client'
 import { loginSchema } from '@/schemas/auth'
 import { useForm } from '@tanstack/react-form-start'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { useTransition } from 'react'
 import { toast } from 'sonner'
 
 export function LoginForm() {
   const navigate = useNavigate()
+  const [isPending, startTransition] = useTransition()
 
   const form = useForm({
     defaultValues: {
@@ -39,19 +41,21 @@ export function LoginForm() {
     validators: {
       onSubmit: loginSchema,
     },
-    onSubmit: async ({ value }) => {
-      await authClient.signIn.email({
-        email: value.email,
-        password: value.password,
-        fetchOptions: {
-          onSuccess: () => {
-            toast.success('Login successful')
-            navigate({ to: '/dashboard' })
+    onSubmit: ({ value }) => {
+      startTransition(async () => {
+        await authClient.signIn.email({
+          email: value.email,
+          password: value.password,
+          fetchOptions: {
+            onSuccess: () => {
+              toast.success('Login successful')
+              navigate({ to: '/dashboard' })
+            },
+            onError: ({ error }) => {
+              toast.error(error.message || 'Login failed')
+            },
           },
-          onError: ({ error }) => {
-            toast.error(error.message || 'Login failed')
-          },
-        },
+        })
       })
     },
   })
@@ -126,7 +130,9 @@ export function LoginForm() {
             />
 
             <Field>
-              <Button type="submit">Login</Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? 'Logging in...' : 'Login'}
+              </Button>
               {/* <Button variant="outline" type="button">
                 Login with Google
               </Button> */}
