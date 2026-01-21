@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-20 22:46:21
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-20 23:25:53
+ * @LastEditTime: 2026-01-21 16:20:56
  * @FilePath: /tanstack-start-tutorial-yt/src/components/web/app-sidebar.tsx
  * @Description:
  */
@@ -14,16 +14,18 @@ import {
   BookOpen,
   Bot,
   Command,
+  Compass,
   Frame,
   GalleryVerticalEnd,
+  Import,
   Map,
   PieChart,
   Settings2,
   SquareTerminal,
 } from 'lucide-react'
 
-import { NavMain } from './nav-main'
-import { NavProjects } from './nav-projects'
+// import { NavMain } from './nav-main'
+import { NavPrimary } from './nav-primary'
 import { NavUser } from './nav-user'
 // import { TeamSwitcher } from './team-switcher'
 import {
@@ -37,6 +39,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { Link } from '@tanstack/react-router'
+import { NavPrimaryProps } from '@/lib/types'
 
 // This is sample data.
 const data = {
@@ -168,6 +171,24 @@ const data = {
   ],
 }
 
+const navItems: NavPrimaryProps['items'] = [
+  {
+    title: 'Items',
+    icon: BookmarkIcon,
+    to: '/dashboard/items',
+  },
+  {
+    title: 'Import',
+    icon: Import,
+    to: '/dashboard/import',
+  },
+  {
+    title: 'Discover',
+    icon: Compass,
+    to: '/dashboard/discover',
+  },
+]
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -192,8 +213,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        {/* <NavMain items={data.navMain} /> */}
+        <NavPrimary items={navItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
