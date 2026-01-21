@@ -13,5 +13,8 @@ export interface NavPrimaryProps {
     title: string
     to: string
     icon: LucideIcon
+    activeOptions?: {
+      exact: boolean
+    }
   }[]
 }

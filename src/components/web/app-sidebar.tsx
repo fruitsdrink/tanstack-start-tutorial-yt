@@ -38,7 +38,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { Link } from '@tanstack/react-router'
+import { Link, linkOptions } from '@tanstack/react-router'
 import { NavPrimaryProps } from '@/lib/types'
 
 // This is sample data.
@@ -171,23 +171,32 @@ const data = {
   ],
 }
 
-const navItems: NavPrimaryProps['items'] = [
+const navItems: NavPrimaryProps['items'] = linkOptions([
   {
     title: 'Items',
     icon: BookmarkIcon,
     to: '/dashboard/items',
+    activeOptions: {
+      exact: true,
+    },
   },
   {
     title: 'Import',
     icon: Import,
     to: '/dashboard/import',
+    activeOptions: {
+      exact: true,
+    },
   },
   {
     title: 'Discover',
     icon: Compass,
     to: '/dashboard/discover',
+    activeOptions: {
+      exact: true,
+    },
   },
-]
+])
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
