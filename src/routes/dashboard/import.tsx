@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { scrapeUrlFn } from '@/data/items'
 import { bulkImportSchema, importSchema } from '@/schemas/import'
 import { useForm } from '@tanstack/react-form-start'
 import { createFileRoute } from '@tanstack/react-router'
@@ -29,7 +30,7 @@ function RouteComponent() {
 
   const form = useForm({
     defaultValues: {
-      url: 'https://example.com',
+      url: '',
     },
     validators: {
       onSubmit: importSchema,
@@ -37,8 +38,9 @@ function RouteComponent() {
     onSubmit: ({ value }) => {
       startTransition(async () => {
         // 模拟延迟1秒
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        // await new Promise((resolve) => setTimeout(resolve, 1000))
         console.log(value)
+        await scrapeUrlFn({ data: value })
       })
     },
   })
