@@ -14,16 +14,9 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/hooks/use-auth'
+import { NavUserProps } from '@/lib/types'
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
+export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
 
   const { logout, isPending } = useAuth()
@@ -48,8 +41,16 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage
+                  src={
+                    user.image ??
+                    `https://api.dicebear.com/9.x/lorelei/svg?seed=${user.name}`
+                  }
+                  alt={user.name}
+                />
+                <AvatarFallback className="rounded-lg">
+                  {user.name.slice(0, 2)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
