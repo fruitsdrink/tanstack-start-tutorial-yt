@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/web/app-sidebar'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { Separator } from '@/components/ui/separator'
 import { getSessionFn } from '@/data/session'
 
 export const Route = createFileRoute('/dashboard')({
