@@ -10,6 +10,7 @@ import { prisma } from '@/db'
 import { firecrawl } from '@/lib/firecrawl'
 import { authFnMiddleware } from '@/middlewares/auth'
 import { bulkImportSchema, extractSchema, importSchema } from '@/schemas/import'
+import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import z from 'zod'
 
@@ -165,10 +166,34 @@ export const getItemsFn = createServerFn({ method: 'GET' })
   .middleware([authFnMiddleware])
   .handler(async ({ context: { session } }) => {
     // 模拟延迟5秒钟
-    await new Promise((resolve) => setTimeout(resolve, 5000))
+    // await new Promise((resolve) => setTimeout(resolve, 5000))
     const items = await prisma.savedItem.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
     })
     return items
+  })
+
+export const getItemByIdFn = createServerFn({ method: 'GET' })
+  .middleware([authFnMiddleware])
+  .inputValidator(
+    z.object({
+      id: z.string(),
+    }),
+  )
+  .handler(async ({ context, data }) => {
+    // 模拟延迟5秒
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+    const item = await prisma.savedItem.findUnique({
+      where: {
+        id: data.id,
+        userId: context.session.user.id,
+      },
+    })
+
+    if (!item) {
+      throw notFound()
+    }
+
+    return item
   })
