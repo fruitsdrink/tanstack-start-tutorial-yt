@@ -20,6 +20,7 @@ import { useForm } from '@tanstack/react-form-start'
 import { createFileRoute } from '@tanstack/react-router'
 import { GlobeIcon, LinkIcon, Loader2Icon } from 'lucide-react'
 import { useTransition } from 'react'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/dashboard/import')({
   component: RouteComponent,
@@ -41,6 +42,7 @@ function RouteComponent() {
         // await new Promise((resolve) => setTimeout(resolve, 1000))
         console.log(value)
         await scrapeUrlFn({ data: value })
+        toast.success('URL scraped successfully!')
       })
     },
   })

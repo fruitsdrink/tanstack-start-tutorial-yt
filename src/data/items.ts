@@ -2,26 +2,25 @@
  * @Author: 水果饮料
  * @Date: 2026-01-23 15:25:47
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-23 16:13:16
+ * @LastEditTime: 2026-01-24 09:51:56
  * @FilePath: /tanstack-start-tutorial-yt/src/data/items.ts
  * @Description:
  */
 import { prisma } from '@/db'
 import { firecrawl } from '@/lib/firecrawl'
+import { authFnMiddleware } from '@/middlewares/auth'
 import { extractSchema, importSchema } from '@/schemas/import'
 import { createServerFn } from '@tanstack/react-start'
 import z from 'zod'
-import { getSessionFn } from './session'
 
 export const scrapeUrlFn = createServerFn({ method: 'POST' })
+  .middleware([authFnMiddleware])
   .inputValidator(importSchema)
-  .handler(async ({ data: { url } }) => {
-    const { user } = await getSessionFn()
-
+  .handler(async ({ data: { url }, context: { session } }) => {
     const item = await prisma.savedItem.create({
       data: {
         url,
-        userId: user.id,
+        userId: session.user.id,
         status: 'PROCESSING',
       },
     })
