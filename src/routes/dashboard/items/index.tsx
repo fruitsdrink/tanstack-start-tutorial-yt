@@ -2,29 +2,102 @@
  * @Author: 水果饮料
  * @Date: 2026-01-22 13:17:28
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-24 12:52:09
+ * @LastEditTime: 2026-01-24 15:48:33
  * @FilePath: /tanstack-start-tutorial-yt/src/routes/dashboard/items/index.tsx
  * @Description:
  */
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { getItemsFn } from '@/data/items'
+import { ItemStatus } from '@/generated/prisma/enums'
 import { copyToClipboard } from '@/lib/clipboard'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { Copy } from 'lucide-react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Copy, InboxIcon } from 'lucide-react'
+import { zodValidator } from '@tanstack/zod-adapter' // only use zod v3
+import z from 'zod'
+import { useEffect, useState } from 'react'
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
+
+const itemSearchSchema = z.object({
+  q: z.string().default(''),
+  status: z.union([z.literal('all'), z.nativeEnum(ItemStatus)]).default('all'),
+})
+
+type ItemSearch = z.infer<typeof itemSearchSchema>
 
 export const Route = createFileRoute('/dashboard/items/')({
   component: RouteComponent,
   loader: () => getItemsFn(),
+  validateSearch: zodValidator(itemSearchSchema),
 })
 
-function RouteComponent() {
-  const items = Route.useLoaderData()
+function ItemsList({
+  q,
+  status,
+  data,
+}: {
+  q: ItemSearch['q']
+  status: ItemSearch['status']
+  data: Awaited<ReturnType<typeof getItemsFn>>
+}) {
+  const filteredItems = data.filter((item) => {
+    // 过滤查询
+    const matchesQuery =
+      q === '' ||
+      item.title?.toLowerCase().includes(q.toLowerCase()) ||
+      item.tags.some((tag) => tag.toLowerCase().includes(q.toLowerCase()))
+    // 过滤状态
+    const matchesStatus = status === 'all' || item.status === status
+    // 返回查询和状态都匹配的项
+    return matchesQuery && matchesStatus
+  })
+
+  if (filteredItems.length === 0) {
+    return (
+      <Empty className="border rounded-lg h-full">
+        <EmptyHeader>
+          <EmptyMedia variant={'icon'}>
+            <InboxIcon className="size-12 text-muted-foreground" />
+          </EmptyMedia>
+          <EmptyTitle>
+            {data.length === 0 ? 'No Items saved yet' : 'No items found'}
+          </EmptyTitle>
+          <EmptyDescription>
+            {data.length === 0
+              ? 'Import a Url to get started with saving your content'
+              : 'No items match your current search filter'}
+          </EmptyDescription>
+        </EmptyHeader>
+        {data.length === 0 && (
+          <EmptyContent>
+            <Link className={buttonVariants()} to="/dashboard/import">
+              Import URL
+            </Link>
+          </EmptyContent>
+        )}
+      </Empty>
+    )
+  }
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      {items.map((item) => (
+      {filteredItems.map((item) => (
         <Card
           key={item.id}
           className="group overflow-hidden transition-all hover:shadow-lg pt-0"
@@ -71,6 +144,76 @@ function RouteComponent() {
           </Link>
         </Card>
       ))}
+    </div>
+  )
+}
+
+function RouteComponent() {
+  const items = Route.useLoaderData()
+  const { q, status } = Route.useSearch()
+
+  const [searchInput, setSearchInput] = useState(q)
+
+  const navigate = useNavigate({ from: Route.fullPath })
+
+  useEffect(() => {
+    if (searchInput === q) return
+
+    const timeoutId = setTimeout(() => {
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          q: searchInput,
+        }),
+      })
+
+      return () => clearTimeout(timeoutId)
+    }, 300)
+  }, [searchInput, q, navigate])
+
+  return (
+    <div className="flex flex-1 flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-bold">Saved Items</h1>
+        <p className="text-muted-foreground">
+          Your saved articles and content!
+        </p>
+      </div>
+
+      {/* Search and Filter Controls */}
+      <div className="flex gap-4">
+        <Input
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="Search by title or tags..."
+        />
+        <Select
+          value={status}
+          onValueChange={(value) =>
+            navigate({
+              search: (prev) => ({
+                ...prev,
+                status: value as typeof status,
+              }),
+            })
+          }
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            {Object.values(ItemStatus).map((status) => (
+              <SelectItem key={status} value={status} className="capitalize">
+                {status.toLowerCase()}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Item List */}
+      <ItemsList q={q} status={status} data={items} />
     </div>
   )
 }
