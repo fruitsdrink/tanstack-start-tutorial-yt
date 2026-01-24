@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-23 15:25:47
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-24 12:16:34
+ * @LastEditTime: 2026-01-24 12:30:29
  * @FilePath: /tanstack-start-tutorial-yt/src/data/items.ts
  * @Description:
  */
@@ -159,4 +159,14 @@ export const bulkScrapeUrlFn = createServerFn({ method: 'POST' })
         })
       }
     }
+  })
+
+export const getItemsFn = createServerFn({ method: 'GET' })
+  .middleware([authFnMiddleware])
+  .handler(async ({ context: { session } }) => {
+    const items = await prisma.savedItem.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: 'desc' },
+    })
+    return items
   })
