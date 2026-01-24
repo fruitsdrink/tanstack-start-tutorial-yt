@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-23 15:25:47
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-24 12:30:29
+ * @LastEditTime: 2026-01-24 16:10:34
  * @FilePath: /tanstack-start-tutorial-yt/src/data/items.ts
  * @Description:
  */
@@ -164,6 +164,8 @@ export const bulkScrapeUrlFn = createServerFn({ method: 'POST' })
 export const getItemsFn = createServerFn({ method: 'GET' })
   .middleware([authFnMiddleware])
   .handler(async ({ context: { session } }) => {
+    // 模拟延迟5秒钟
+    await new Promise((resolve) => setTimeout(resolve, 5000))
     const items = await prisma.savedItem.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },

@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-22 13:17:28
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-24 15:48:33
+ * @LastEditTime: 2026-01-24 16:19:50
  * @FilePath: /tanstack-start-tutorial-yt/src/routes/dashboard/items/index.tsx
  * @Description:
  */
@@ -24,7 +24,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { Copy, InboxIcon } from 'lucide-react'
 import { zodValidator } from '@tanstack/zod-adapter' // only use zod v3
 import z from 'zod'
-import { useEffect, useState } from 'react'
+import { Suspense, use, useEffect, useState } from 'react'
 import {
   Empty,
   EmptyContent,
@@ -33,6 +33,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const itemSearchSchema = z.object({
   q: z.string().default(''),
@@ -43,9 +44,32 @@ type ItemSearch = z.infer<typeof itemSearchSchema>
 
 export const Route = createFileRoute('/dashboard/items/')({
   component: RouteComponent,
-  loader: () => getItemsFn(),
+  loader: () => ({ itemsPromise: getItemsFn() }),
   validateSearch: zodValidator(itemSearchSchema),
 })
+
+function ItemsGridSkeleton() {
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      {[1, 2, 3, 4].map((i) => (
+        <Card key={i} className="overflow-hidden pt-0">
+          <Skeleton className="aspect-video w-full " />
+          <CardHeader className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-5 w-20 rounded-full" />
+              <Skeleton className="size-8 rounded-md" />
+            </div>
+
+            {/* title */}
+            <Skeleton className="h-6 w-full" />
+            {/* author */}
+            <Skeleton className="h-4 w-40" />
+          </CardHeader>
+        </Card>
+      ))}
+    </div>
+  )
+}
 
 function ItemsList({
   q,
@@ -54,9 +78,10 @@ function ItemsList({
 }: {
   q: ItemSearch['q']
   status: ItemSearch['status']
-  data: Awaited<ReturnType<typeof getItemsFn>>
+  data: ReturnType<typeof getItemsFn>
 }) {
-  const filteredItems = data.filter((item) => {
+  const items = use(data)
+  const filteredItems = items.filter((item) => {
     // 过滤查询
     const matchesQuery =
       q === '' ||
@@ -76,15 +101,15 @@ function ItemsList({
             <InboxIcon className="size-12 text-muted-foreground" />
           </EmptyMedia>
           <EmptyTitle>
-            {data.length === 0 ? 'No Items saved yet' : 'No items found'}
+            {items.length === 0 ? 'No Items saved yet' : 'No items found'}
           </EmptyTitle>
           <EmptyDescription>
-            {data.length === 0
+            {items.length === 0
               ? 'Import a Url to get started with saving your content'
               : 'No items match your current search filter'}
           </EmptyDescription>
         </EmptyHeader>
-        {data.length === 0 && (
+        {items.length === 0 && (
           <EmptyContent>
             <Link className={buttonVariants()} to="/dashboard/import">
               Import URL
@@ -149,7 +174,7 @@ function ItemsList({
 }
 
 function RouteComponent() {
-  const items = Route.useLoaderData()
+  const { itemsPromise } = Route.useLoaderData()
   const { q, status } = Route.useSearch()
 
   const [searchInput, setSearchInput] = useState(q)
@@ -213,7 +238,9 @@ function RouteComponent() {
       </div>
 
       {/* Item List */}
-      <ItemsList q={q} status={status} data={items} />
+      <Suspense fallback={<ItemsGridSkeleton />}>
+        <ItemsList q={q} status={status} data={itemsPromise} />
+      </Suspense>
     </div>
   )
 }
