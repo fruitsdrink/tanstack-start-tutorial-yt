@@ -8,29 +8,31 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getItemByIdFn } from '@/data/items'
+import { getItemByIdFn, saveSummaryAndGenerateTagsFn } from '@/data/items'
 import { cn } from '@/lib/utils'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import {
   ArrowLeftIcon,
   CalculatorIcon,
   ChevronDownIcon,
   ClockIcon,
   ExternalLinkIcon,
+  Loader2,
+  Sparkles,
   UserIcon,
 } from 'lucide-react'
-import { Suspense, use, useState } from 'react'
+import { Suspense, useState } from 'react'
+import { useCompletion } from '@ai-sdk/react'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/dashboard/items/$itemId')({
   component: RouteComponent,
-  loader: ({ params }) => ({
-    itemPromise: getItemByIdFn({ data: { id: params.itemId } }),
-  }),
-  head: () => {
+  loader: ({ params }) => getItemByIdFn({ data: { id: params.itemId } }),
+  head: ({ loaderData }) => {
     return {
       meta: [
         {
-          title: 'Item Details',
+          title: loaderData?.title || 'Item Details',
         },
         {
           name: 'description',
@@ -46,7 +48,7 @@ export const Route = createFileRoute('/dashboard/items/$itemId')({
 })
 
 function RouteComponent() {
-  const { itemPromise } = Route.useLoaderData()
+  const data = Route.useLoaderData()
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 w-full">
@@ -62,16 +64,52 @@ function RouteComponent() {
         </Link>
       </div>
       <Suspense fallback={<ItemSkeleton />}>
-        <Item data={itemPromise} />
+        <Item data={data} />
       </Suspense>
     </div>
   )
 }
 
-function Item({ data }: { data: ReturnType<typeof getItemByIdFn> }) {
+function Item({ data }: { data: Awaited<ReturnType<typeof getItemByIdFn>> }) {
   const [contentOpen, setContentOpen] = useState(false)
 
-  const item = use(data)
+  const item = data
+
+  const router = useRouter()
+
+  const { completion, complete, isLoading } = useCompletion({
+    api: '/api/ai/summary',
+    initialCompletion: item.summary ?? undefined,
+    streamProtocol: 'text',
+    body: {
+      itemId: item.id,
+    },
+    onFinish: async (_prompt, completionText) => {
+      await saveSummaryAndGenerateTagsFn({
+        data: {
+          id: item.id,
+          summary: completionText,
+        },
+      })
+
+      toast.success('Summary and tags generated and saved successfully')
+
+      router.invalidate()
+    },
+    onError: (error) => {
+      console.error('Error summarizing item:', error)
+      toast.error(error.message)
+    },
+  })
+
+  function handleGenerateSummary() {
+    if (!item.content) {
+      toast.error('No content available to summarize')
+      return
+    }
+
+    complete(item.content)
+  }
 
   return (
     <>
@@ -129,7 +167,47 @@ function Item({ data }: { data: ReturnType<typeof getItemByIdFn> }) {
           </div>
         )}
 
-        <p>Hey this is for the summary</p>
+        {/* Summary section */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-primary mb-3">
+                  Summary
+                </h2>
+                {completion || item.summary ? (
+                  <MessageResponse>{completion}</MessageResponse>
+                ) : (
+                  <p className="text-muted-foreground italic">
+                    {item.content
+                      ? 'No summary yet. Generate on with ai'
+                      : 'No content available to summarize.'}
+                  </p>
+                )}
+              </div>
+
+              {item.content && !item.summary && (
+                <Button
+                  onClick={handleGenerateSummary}
+                  size={'sm'}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="size-4" />
+                      Generate
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {item.content && (
           <Collapsible open={contentOpen} onOpenChange={setContentOpen}>
