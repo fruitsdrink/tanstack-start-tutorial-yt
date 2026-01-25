@@ -26,6 +26,23 @@ export const Route = createFileRoute('/dashboard/items/$itemId')({
   loader: ({ params }) => ({
     itemPromise: getItemByIdFn({ data: { id: params.itemId } }),
   }),
+  head: () => {
+    return {
+      meta: [
+        {
+          title: 'Item Details',
+        },
+        {
+          name: 'description',
+          content: 'Detailed information about the item',
+        },
+        {
+          property: 'og:title',
+          content: 'Item Details',
+        },
+      ],
+    }
+  },
 })
 
 function RouteComponent() {
