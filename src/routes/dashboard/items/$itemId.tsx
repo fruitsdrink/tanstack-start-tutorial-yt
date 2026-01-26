@@ -54,7 +54,7 @@ function RouteComponent() {
     <div className="mx-auto max-w-3xl space-y-6 w-full">
       <div className="flex justify-start">
         <Link
-          to="/dashboard"
+          to="/dashboard/items"
           className={buttonVariants({
             variant: 'outline',
           })}
@@ -113,15 +113,16 @@ function Item({ data }: { data: Awaited<ReturnType<typeof getItemByIdFn>> }) {
 
   return (
     <>
-      {item.ogImage && (
-        <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
-          <img
-            className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-            src={item.ogImage}
-            alt={item.title ?? 'Item Image'}
-          />
-        </div>
-      )}
+      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+        <img
+          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+          src={
+            item.ogImage ||
+            'https://images.unsplash.com/photo-1635776062043-223faf322554?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+          }
+          alt={item.title ?? 'Item Image'}
+        />
+      </div>
 
       <div className="space-y-3">
         <h1 className="text-3xl font-bold tracking-tight">

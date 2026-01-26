@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-22 13:17:28
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-24 16:19:50
+ * @LastEditTime: 2026-01-26 11:16:11
  * @FilePath: /tanstack-start-tutorial-yt/src/routes/dashboard/items/index.tsx
  * @Description:
  */
@@ -143,15 +143,16 @@ function ItemsList({
             }}
             className="block"
           >
-            {item.ogImage && (
-              <div className="aspect-video overflow-hidden">
-                <img
-                  src={item.ogImage}
-                  alt={item.title ?? 'Article Thumbnail'}
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                />
-              </div>
-            )}
+            <div className="aspect-video overflow-hidden">
+              <img
+                src={
+                  item.ogImage ||
+                  'https://images.unsplash.com/photo-1635776062043-223faf322554?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+                }
+                alt={item.title ?? 'Article Thumbnail'}
+                className="h-full w-full object-cover transition-transform group-hover:scale-105"
+              />
+            </div>
 
             <CardHeader className="space-y-3 pt-4">
               <div className="flex items-center justify-between gap-2">

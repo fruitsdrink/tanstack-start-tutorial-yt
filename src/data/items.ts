@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-23 15:25:47
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-24 16:10:34
+ * @LastEditTime: 2026-01-26 11:07:23
  * @FilePath: /tanstack-start-tutorial-yt/src/data/items.ts
  * @Description:
  */
@@ -10,7 +10,13 @@ import { prisma } from '@/db'
 import { firecrawl } from '@/lib/firecrawl'
 import { openrouter } from '@/lib/openRouter'
 import { authFnMiddleware } from '@/middlewares/auth'
-import { bulkImportSchema, extractSchema, importSchema } from '@/schemas/import'
+import {
+  bulkImportSchema,
+  extractSchema,
+  importSchema,
+  searchSchema,
+} from '@/schemas/import'
+import { SearchResultWeb } from '@mendable/firecrawl-js'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { generateText } from 'ai'
@@ -245,4 +251,33 @@ Example: technology, programming, web development, javascript`,
         tags,
       },
     })
+  })
+
+export const searchWebFn = createServerFn({ method: 'POST' })
+  .middleware([authFnMiddleware])
+  .inputValidator(searchSchema)
+  .handler(async ({ data }) => {
+    const result = await firecrawl.search(data.query, {
+      limit: 15,
+      location: 'China',
+      tbs: 'qdr:y', // 查询一年的结果
+      // scrapeOptions: {
+      //   formats: ['markdown'],
+      // },
+    })
+
+    const filterResults: SearchResultWeb[] = []
+
+    result.web?.map((item) => {
+      const searchResultWeb = {
+        url: (item as SearchResultWeb).url,
+        title: (item as SearchResultWeb).title,
+        description: (item as SearchResultWeb).description,
+      }
+      if (!filterResults.find((item) => item.url === searchResultWeb.url)) {
+        filterResults.push(searchResultWeb)
+      }
+    })
+
+    return filterResults
   })
