@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-23 15:25:47
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-26 11:07:23
+ * @LastEditTime: 2026-01-26 12:23:50
  * @FilePath: /tanstack-start-tutorial-yt/src/data/items.ts
  * @Description:
  */
@@ -104,12 +104,22 @@ export const mapUrlFn = createServerFn({ method: 'POST' })
     return result.links
   })
 
+export type BulkScrapeProgress = {
+  completed: number
+  total: number
+  url: string
+  status: 'success' | 'failed'
+}
+
 export const bulkScrapeUrlFn = createServerFn({ method: 'POST' })
   .middleware([authFnMiddleware])
   .inputValidator(z.object({ urls: z.array(z.string().url()) }))
-  .handler(async ({ data: { urls }, context: { session } }) => {
+  .handler(async function* ({ data: { urls }, context: { session } }) {
+    // function* 是一个生成器函数，它可以在循环中 yield 进度
+    const total = urls.length
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i]
+
       const item = await prisma.savedItem.create({
         data: {
           url,
@@ -117,6 +127,8 @@ export const bulkScrapeUrlFn = createServerFn({ method: 'POST' })
           status: 'PROCESSING',
         },
       })
+
+      let status: BulkScrapeProgress['status'] = 'success'
 
       try {
         const result = await firecrawl.scrape(url, {
@@ -160,6 +172,7 @@ export const bulkScrapeUrlFn = createServerFn({ method: 'POST' })
           },
         })
       } catch (error) {
+        status = 'failed'
         await prisma.savedItem.update({
           where: { id: item.id },
           data: {
@@ -167,6 +180,14 @@ export const bulkScrapeUrlFn = createServerFn({ method: 'POST' })
           },
         })
       }
+
+      const progress: BulkScrapeProgress = {
+        completed: i + 1,
+        total,
+        url,
+        status,
+      }
+      yield progress
     }
   })
 

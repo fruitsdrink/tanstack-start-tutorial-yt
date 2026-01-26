@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-22 13:17:28
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-26 11:02:07
+ * @LastEditTime: 2026-01-26 12:40:44
  * @FilePath: /tanstack-start-tutorial-yt/src/routes/dashboard/discover.tsx
  * @Description:
  */
@@ -22,7 +22,8 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { bulkScrapeUrlFn, searchWebFn } from '@/data/items'
+import { Progress } from '@/components/ui/progress'
+import { BulkScrapeProgress, bulkScrapeUrlFn, searchWebFn } from '@/data/items'
 import { searchSchema } from '@/schemas/import'
 import { SearchResultWeb } from '@mendable/firecrawl-js'
 import { useForm } from '@tanstack/react-form-start'
@@ -38,6 +39,7 @@ export const Route = createFileRoute('/dashboard/discover')({
 function RouteComponent() {
   const [searchResults, setSearchResults] = useState<Array<SearchResultWeb>>([])
   const [selectedUrls, setSelectedUrls] = useState<Set<string>>(new Set())
+  const [progress, setProgress] = useState<BulkScrapeProgress | null>(null)
 
   const [isPending, startTransition] = useTransition()
   const [isBulkPending, startBulkTransition] = useTransition()
@@ -69,9 +71,38 @@ function RouteComponent() {
         return
       }
 
-      await bulkScrapeUrlFn({ data: { urls: Array.from(selectedUrls) } })
+      setProgress({
+        completed: 0,
+        total: selectedUrls.size,
+        url: '',
+        status: 'success',
+      })
 
-      toast.success(`Successfully imported ${selectedUrls.size} URLs!`)
+      let successCount = 0
+      let failedCount = 0
+
+      for await (const update of await bulkScrapeUrlFn({
+        data: { urls: Array.from(selectedUrls) },
+      })) {
+        setProgress(update)
+
+        if (update.status === 'success') {
+          successCount++
+        } else {
+          failedCount++
+        }
+      }
+
+      setProgress(null)
+
+      if (failedCount > 0) {
+        toast.success(`Import ${successCount} Urls (${failedCount} failed)`)
+      } else {
+        toast.success(`Success import ${successCount} Urls`)
+      }
+      // await bulkScrapeUrlFn({ data: { urls: Array.from(selectedUrls) } })
+
+      // toast.success(`Successfully imported ${selectedUrls.size} URLs!`)
     })
   }
 
@@ -207,6 +238,28 @@ function RouteComponent() {
                   ))}
                 </div>
 
+                {progress && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Importing: {progress.completed} / {progress.total}
+                      </span>
+                      <span className="font-medium">
+                        {Math.round(
+                          (progress.completed / progress.total) * 100,
+                        )}
+                        %
+                      </span>
+                    </div>
+
+                    <Progress
+                      value={
+                        Math.round(progress.completed / progress.total) * 100
+                      }
+                    />
+                  </div>
+                )}
+
                 <Button
                   disabled={isBulkPending}
                   onClick={handleBulkImport}
@@ -215,7 +268,9 @@ function RouteComponent() {
                   {isBulkPending ? (
                     <>
                       <Loader2Icon className="size-4 animate-spin" />
-                      "Processing..."
+                      {progress
+                        ? `Importing ${progress.completed}/${progress.total}...`
+                        : 'Starting...'}
                     </>
                   ) : (
                     `Import ${selectedUrls.size} URLs`
