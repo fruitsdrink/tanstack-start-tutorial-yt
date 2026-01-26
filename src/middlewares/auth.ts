@@ -2,7 +2,7 @@
  * @Author: 水果饮料
  * @Date: 2026-01-24 09:41:41
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-24 10:21:48
+ * @LastEditTime: 2026-01-26 15:22:24
  * @FilePath: /tanstack-start-tutorial-yt/src/middlewares/auth.ts
  * @Description:
  */
@@ -29,7 +29,7 @@ export const authMiddleware = createMiddleware().server(
 
     if (
       !url.pathname.startsWith('/dashboard') &&
-      !url.pathname.startsWith('/api')
+      !url.pathname.startsWith('/api/ai')
     ) {
       return next()
     }
