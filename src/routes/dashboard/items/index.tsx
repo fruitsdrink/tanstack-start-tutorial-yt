@@ -2,13 +2,18 @@
  * @Author: 水果饮料
  * @Date: 2026-01-22 13:17:28
  * @LastEditors: 水果饮料
- * @LastEditTime: 2026-01-26 11:16:11
+ * @LastEditTime: 2026-01-26 11:23:21
  * @FilePath: /tanstack-start-tutorial-yt/src/routes/dashboard/items/index.tsx
  * @Description:
  */
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -181,6 +186,22 @@ function ItemsList({
               {item.author && (
                 <p className="text-xs text-muted-foreground">{item.author}</p>
               )}
+
+              {item.summary && (
+                <CardDescription className="line-clamp-3 text-sm text-muted-foreground">
+                  {item.summary}
+                </CardDescription>
+              )}
+
+              {item.tags.length ? (
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  {item.tags.slice(0, 4).map((tag, index) => (
+                    <Badge variant={'secondary'} key={index}>
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
             </CardHeader>
           </Link>
         </Card>
